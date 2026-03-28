@@ -9,17 +9,18 @@ jobs:
     timeout-minutes: 60
 
     steps:
-      - name: Install x11vnc
-        run: brew install x11vnc
+      - name: Install dependencies
+        run: brew install x11vnc xquartz
 
-      - name: Enable Screen Sharing
+      - name: Start virtual display
         run: |
-          sudo defaults write /var/db/launchd.db/com.apple.launchd/overrides.plist com.apple.screensharing -dict Disabled -bool false
-          sudo launchctl load -w /System/Library/LaunchDaemons/com.apple.screensharing.plist || true
+          Xvfb :1 -screen 0 1280x800x24 &
+          sleep 5
+          echo "Display ready"
 
       - name: Start x11vnc
         run: |
-          x11vnc -display :0 -passwd mypassword -forever -bg -o /tmp/x11vnc.log
+          DISPLAY=:1 x11vnc -passwd mypassword -forever -bg -noxdamage -o /tmp/x11vnc.log
           sleep 5
           cat /tmp/x11vnc.log
 
