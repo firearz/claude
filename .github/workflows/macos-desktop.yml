@@ -21,7 +21,7 @@ jobs:
       - name: Write tunnel script
         run: |
           echo '#!/bin/sh' > /tmp/tunnel.sh
-          echo 'ssh -o StrictHostKeyChecking=no -o ServerAliveInterval=30 -o ServerAliveCountMax=10 -R 0:localhost:5900 serveo.net > /tmp/tunnel.log 2>/tmp/tunnel.err' >> /tmp/tunnel.sh
+          echo 'ssh -o StrictHostKeyChecking=no -o ServerAliveInterval=30 -p 443 -R0:localhost:5900 tcp@a.pinggy.io > /tmp/tunnel.log 2>/tmp/tunnel.err' >> /tmp/tunnel.sh
           chmod +x /tmp/tunnel.sh
 
       - name: Start tunnel
@@ -33,3 +33,12 @@ jobs:
 
       - name: Keep alive
         run: sleep 3300
+```
+
+### What changed
+- Switched to `tcp@a.pinggy.io` on port `443` — uses HTTPS port so it's rarely blocked
+- No account or token needed
+
+In the logs you should see:
+```
+tcp://rsng1.a.pinggy.io:XXXXX
