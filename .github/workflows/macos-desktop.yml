@@ -11,56 +11,21 @@ jobs:
     steps:
       - name: Enable VNC Screen Sharing
         run: |
-          sudo /System/Library/CoreServices/RemoteManagement/ARDAgent.app/Contents/Resources/kickstart \
-            -activate -configure -access -on \
-            -clientopts -setvnclegacy -vnclegacy yes \
-            -clientopts -setvncpw -vncpw mypassword \
-            -restart -agent -privs -all
+          sudo /System/Library/CoreServices/RemoteManagement/ARDAgent.app/Contents/Resources/kickstart -activate -configure -access -on -clientopts -setvnclegacy -vnclegacy yes -clientopts -setvncpw -vncpw mypassword -restart -agent -privs -all
 
       - name: Set runner user password
         run: |
           sudo dscl . -passwd /Users/runner mypassword
 
-      - name: Generate SSH key for localhost.run
+      - name: Generate SSH key
         run: |
           ssh-keygen -t rsa -b 2048 -f ~/.ssh/id_rsa -N ""
 
-      - name: Start localhost.run tunnel on port 5900
+      - name: Start tunnel
         run: |
-          ssh -o StrictHostKeyChecking=no \
-              -o ServerAliveInterval=30 \
-              -o ServerAliveCountMax=10 \
-              -R 5900:localhost:5900 \
-              nokey@localhost.run 2>&1 | tee /tmp/tunnel.log &
-          echo "Waiting for tunnel..."
+          ssh -o StrictHostKeyChecking=no -o ServerAliveInterval=30 -o ServerAliveCountMax=10 -R 5900:localhost:5900 nokey@localhost.run > /tmp/tunnel.log 2>&1 &
           sleep 10
-          echo "---- TUNNEL INFO ----"
           cat /tmp/tunnel.log
-          echo "---------------------"
 
-      - name: Keep session alive
-        run: |
-          echo "Session is live. Check above for tunnel address."
-          sleep 3300
-```
-
----
-
-### How to Use It
-
-**1. Add the file to your repo**
-- Go to your GitHub repo
-- Create the path: `.github/workflows/macos-desktop.yml`
-- Paste the workflow above and commit
-
-**2. Run the workflow**
-- Go to your repo → **Actions** tab
-- Click **macOS Remote Desktop** on the left
-- Click **Run workflow** → **Run workflow** (green button)
-
-**3. Get the tunnel address**
-- Click the running job to open logs
-- Expand the **"Start localhost.run tunnel"** step
-- You'll see something like:
-```
-  Connect to: abc123.localhost.run:5900
+      - name: Keep alive
+        run: sleep 3300
