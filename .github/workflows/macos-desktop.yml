@@ -9,20 +9,20 @@ jobs:
     timeout-minutes: 60
 
     steps:
-      - name: Install dependencies
-        run: brew install x11vnc xquartz
+      - name: Install TigerVNC
+        run: brew install tiger-vnc
 
-      - name: Start virtual display
+      - name: Create VNC password file
         run: |
-          Xvfb :1 -screen 0 1280x800x24 &
-          sleep 5
-          echo "Display ready"
+          mkdir -p ~/.vnc
+          echo "mypassword" | vncpasswd -f > ~/.vnc/passwd
+          chmod 600 ~/.vnc/passwd
 
-      - name: Start x11vnc
+      - name: Start Xvnc server
         run: |
-          DISPLAY=:1 x11vnc -passwd mypassword -forever -bg -noxdamage -o /tmp/x11vnc.log
+          Xvnc :1 -rfbauth ~/.vnc/passwd -geometry 1280x800 -depth 24 -rfbport 5900 &
           sleep 5
-          cat /tmp/x11vnc.log
+          echo "VNC server started"
 
       - name: Generate SSH key
         run: ssh-keygen -t rsa -b 2048 -f ~/.ssh/id_rsa -N ""
