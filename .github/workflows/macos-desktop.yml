@@ -18,12 +18,18 @@ jobs:
       - name: Generate SSH key
         run: ssh-keygen -t rsa -b 2048 -f ~/.ssh/id_rsa -N ""
 
-      - name: Start serveo TCP tunnel
-        shell: bash
+      - name: Write tunnel script
         run: |
-          nohup ssh -o StrictHostKeyChecking=no -o ServerAliveInterval=30 -o ServerAliveCountMax=10 -R 0:localhost:5900 serveo.net &>> /tmp/tunnel.log &
+          echo '#!/bin/sh' > /tmp/tunnel.sh
+          echo 'ssh -o StrictHostKeyChecking=no -o ServerAliveInterval=30 -o ServerAliveCountMax=10 -R 0:localhost:5900 serveo.net > /tmp/tunnel.log 2>/tmp/tunnel.err' >> /tmp/tunnel.sh
+          chmod +x /tmp/tunnel.sh
+
+      - name: Start tunnel
+        run: |
+          /tmp/tunnel.sh &
           sleep 10
           cat /tmp/tunnel.log
+          cat /tmp/tunnel.err
 
       - name: Keep alive
         run: sleep 3300
