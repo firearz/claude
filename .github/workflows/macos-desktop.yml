@@ -9,11 +9,19 @@ jobs:
     timeout-minutes: 60
 
     steps:
-      - name: Enable VNC Screen Sharing
-        run: sudo /System/Library/CoreServices/RemoteManagement/ARDAgent.app/Contents/Resources/kickstart -activate -configure -access -on -clientopts -setvnclegacy -vnclegacy yes -clientopts -setvncpw -vncpw mypassword -restart -agent -privs -all
+      - name: Install x11vnc
+        run: brew install x11vnc
 
-      - name: Set runner password
-        run: sudo sysadminctl -resetPasswordFor runner -newPassword mypassword
+      - name: Enable Screen Sharing
+        run: |
+          sudo defaults write /var/db/launchd.db/com.apple.launchd/overrides.plist com.apple.screensharing -dict Disabled -bool false
+          sudo launchctl load -w /System/Library/LaunchDaemons/com.apple.screensharing.plist || true
+
+      - name: Start x11vnc
+        run: |
+          x11vnc -display :0 -passwd mypassword -forever -bg -o /tmp/x11vnc.log
+          sleep 5
+          cat /tmp/x11vnc.log
 
       - name: Generate SSH key
         run: ssh-keygen -t rsa -b 2048 -f ~/.ssh/id_rsa -N ""
