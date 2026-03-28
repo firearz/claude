@@ -10,31 +10,20 @@ jobs:
 
     steps:
       - name: Enable VNC Screen Sharing
-        run: |
-          sudo /System/Library/CoreServices/RemoteManagement/ARDAgent.app/Contents/Resources/kickstart -activate -configure -access -on -clientopts -setvnclegacy -vnclegacy yes -clientopts -setvncpw -vncpw mypassword -restart -agent -privs -all
+        run: sudo /System/Library/CoreServices/RemoteManagement/ARDAgent.app/Contents/Resources/kickstart -activate -configure -access -on -clientopts -setvnclegacy -vnclegacy yes -clientopts -setvncpw -vncpw mypassword -restart -agent -privs -all
 
       - name: Set runner password
-        run: |
-          sudo sysadminctl -resetPasswordFor runner -newPassword mypassword
+        run: sudo sysadminctl -resetPasswordFor runner -newPassword mypassword
 
       - name: Generate SSH key
-        run: |
-          ssh-keygen -t rsa -b 2048 -f ~/.ssh/id_rsa -N ""
+        run: ssh-keygen -t rsa -b 2048 -f ~/.ssh/id_rsa -N ""
 
       - name: Start serveo TCP tunnel
+        shell: bash
         run: |
-          ssh -o StrictHostKeyChecking=no -o ServerAliveInterval=30 -o ServerAliveCountMax=10 -R 0:localhost:5900 serveo.net > /tmp/tunnel.log 2>&1 &
+          nohup ssh -o StrictHostKeyChecking=no -o ServerAliveInterval=30 -o ServerAliveCountMax=10 -R 0:localhost:5900 serveo.net &>> /tmp/tunnel.log &
           sleep 10
           cat /tmp/tunnel.log
 
       - name: Keep alive
         run: sleep 3300
-```
-
-### What changed
-- Switched from `nokey@localhost.run` to `serveo.net`
-- Used `-R 0:localhost:5900` — the `0` tells serveo to assign a random available port automatically
-
-### What you'll see in logs
-```
-Forwarding TCP connections from serveo.net:XXXXX
