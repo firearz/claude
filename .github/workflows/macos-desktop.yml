@@ -13,9 +13,9 @@ jobs:
         run: |
           sudo /System/Library/CoreServices/RemoteManagement/ARDAgent.app/Contents/Resources/kickstart -activate -configure -access -on -clientopts -setvnclegacy -vnclegacy yes -clientopts -setvncpw -vncpw mypassword -restart -agent -privs -all
 
-      - name: Set runner user password
+      - name: Set runner password
         run: |
-          sudo dscl . -passwd /Users/runner mypassword
+          sudo sysadminctl -resetPasswordFor runner -newPassword mypassword
 
       - name: Generate SSH key
         run: |
