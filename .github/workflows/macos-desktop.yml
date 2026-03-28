@@ -21,11 +21,20 @@ jobs:
         run: |
           ssh-keygen -t rsa -b 2048 -f ~/.ssh/id_rsa -N ""
 
-      - name: Start tunnel
+      - name: Start serveo TCP tunnel
         run: |
-          ssh -o StrictHostKeyChecking=no -o ServerAliveInterval=30 -o ServerAliveCountMax=10 -R 5900:localhost:5900 nokey@localhost.run > /tmp/tunnel.log 2>&1 &
+          ssh -o StrictHostKeyChecking=no -o ServerAliveInterval=30 -o ServerAliveCountMax=10 -R 0:localhost:5900 serveo.net > /tmp/tunnel.log 2>&1 &
           sleep 10
           cat /tmp/tunnel.log
 
       - name: Keep alive
         run: sleep 3300
+```
+
+### What changed
+- Switched from `nokey@localhost.run` to `serveo.net`
+- Used `-R 0:localhost:5900` — the `0` tells serveo to assign a random available port automatically
+
+### What you'll see in logs
+```
+Forwarding TCP connections from serveo.net:XXXXX
